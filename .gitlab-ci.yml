@@ -35,8 +35,10 @@ deploy-backend:
   needs: [validate-backend]
   script:
     - npm install -g @railway/cli
+    - railway --version
+    - railway whoami
     - cd backend
-    - railway up --service backend
+    - railway up --service backend 2>&1
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
@@ -46,7 +48,9 @@ deploy-frontend:
   needs: [validate-frontend]
   script:
     - npm install -g @railway/cli
+    - railway --version
+    - railway whoami
     - cd frontend
-    - railway up --service frontend
+    - railway up --service frontend 2>&1
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
