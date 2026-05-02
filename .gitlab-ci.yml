@@ -55,7 +55,7 @@ deploy-backend:
   script:
     - *railway-auth
     - cd backend
-    - railway up --service backend
+    - railway up --service backend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
@@ -66,6 +66,6 @@ deploy-frontend:
   script:
     - *railway-auth
     - cd frontend
-    - railway up --service frontend
+    - railway up --service frontend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
