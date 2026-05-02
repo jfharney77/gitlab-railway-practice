@@ -7,7 +7,7 @@ stages:
 
 validate-frontend:
   stage: validate
-  image: node:20-alpine
+  image: node:20
   script:
     - cd frontend
     - npm ci
@@ -31,7 +31,7 @@ validate-backend:
 
 deploy-backend:
   stage: deploy
-  image: node:20-alpine
+  image: node:20
   needs: [validate-backend]
   script:
     - npm install -g @railway/cli
@@ -44,7 +44,7 @@ deploy-backend:
 
 deploy-frontend:
   stage: deploy
-  image: node:20-alpine
+  image: node:20
   needs: [validate-frontend]
   script:
     - npm install -g @railway/cli
