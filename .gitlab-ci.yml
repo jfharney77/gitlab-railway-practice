@@ -54,7 +54,6 @@ deploy-backend:
   needs: [validate-backend]
   script:
     - *railway-auth
-    - cd backend
     - railway up --service clockgame-backend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -65,7 +64,6 @@ deploy-frontend:
   needs: [validate-frontend]
   script:
     - *railway-auth
-    - cd frontend
     - railway up --service clockgame-frontend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
