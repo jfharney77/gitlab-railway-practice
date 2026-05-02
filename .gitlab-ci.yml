@@ -1,0 +1,52 @@
+stages:
+  - validate
+  - deploy
+
+# ── Validate ──────────────────────────────────────────────────────────────────
+# Runs on every push / MR so issues are caught before merge.
+
+validate-frontend:
+  stage: validate
+  image: node:20-alpine
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 1 hour
+
+validate-backend:
+  stage: validate
+  image: python:3.12-slim
+  script:
+    - cd backend
+    - pip install -r requirements.txt -q
+    - python -c "import main; print('Backend import OK')"
+
+# ── Deploy ─────────────────────────────────────────────────────────────────────
+# Runs only on the default branch after validation passes.
+# Requires RAILWAY_TOKEN to be set in GitLab CI/CD variables (masked).
+
+deploy-backend:
+  stage: deploy
+  image: node:20-alpine
+  needs: [validate-backend]
+  script:
+    - npm install -g @railway/cli
+    - cd backend
+    - railway up --service backend --detach
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-frontend:
+  stage: deploy
+  image: node:20-alpine
+  needs: [validate-frontend]
+  script:
+    - npm install -g @railway/cli
+    - cd frontend
+    - railway up --service frontend --detach
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
