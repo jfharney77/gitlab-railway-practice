@@ -27,22 +27,35 @@ validate-backend:
 
 # ── Deploy ─────────────────────────────────────────────────────────────────────
 # Runs only on the default branch after validation passes.
-# Requires RAILWAY_TOKEN to be set in GitLab CI/CD variables (masked).
+# Requires RAILWAY_ACCESS_TOKEN, RAILWAY_REFRESH_TOKEN, and RAILWAY_PROJECT_ID
+# to be set in GitLab CI/CD variables.
+
+.railway-auth: &railway-auth
+  - npm install -g @railway/cli
+  - mkdir -p ~/.railway
+  - |
+    cat > ~/.railway/config.json <<EOF
+    {
+      "projects": {},
+      "user": {
+        "token": null,
+        "accessToken": "$RAILWAY_ACCESS_TOKEN",
+        "refreshToken": "$RAILWAY_REFRESH_TOKEN",
+        "tokenExpiresAt": 9999999999
+      },
+      "linkedFunctions": null
+    }
+    EOF
+  - railway whoami
 
 deploy-backend:
   stage: deploy
   image: node:20
   needs: [validate-backend]
   script:
-    - npm install -g @railway/cli
-    - railway --version
-    - if [ -z "$RAILWAY_TOKEN" ]; then echo "ERROR - RAILWAY_TOKEN is not set"; exit 1; fi
-    - echo "RAILWAY_TOKEN is set (length ${#RAILWAY_TOKEN})"
-    - if [ -z "$RAILWAY_PROJECT_ID" ]; then echo "ERROR - RAILWAY_PROJECT_ID is not set"; exit 1; fi
-    - echo "RAILWAY_PROJECT_ID = $RAILWAY_PROJECT_ID"
-    - railway whoami
+    - *railway-auth
     - cd backend
-    - railway up --service backend 2>&1
+    - railway up --service backend
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
@@ -51,10 +64,8 @@ deploy-frontend:
   image: node:20
   needs: [validate-frontend]
   script:
-    - npm install -g @railway/cli
-    - railway --version
-    - railway whoami
+    - *railway-auth
     - cd frontend
-    - railway up --service frontend 2>&1
+    - railway up --service frontend
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
