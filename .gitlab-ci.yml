@@ -36,6 +36,10 @@ deploy-backend:
   script:
     - npm install -g @railway/cli
     - railway --version
+    - if [ -z "$RAILWAY_TOKEN" ]; then echo "ERROR - RAILWAY_TOKEN is not set"; exit 1; fi
+    - echo "RAILWAY_TOKEN is set (length ${#RAILWAY_TOKEN})"
+    - if [ -z "$RAILWAY_PROJECT_ID" ]; then echo "ERROR - RAILWAY_PROJECT_ID is not set"; exit 1; fi
+    - echo "RAILWAY_PROJECT_ID = $RAILWAY_PROJECT_ID"
     - railway whoami
     - cd backend
     - railway up --service backend 2>&1
