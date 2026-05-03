@@ -41,33 +41,15 @@ test-backend:
 
 # ── Deploy ─────────────────────────────────────────────────────────────────────
 # Runs only on the default branch after validation passes.
-# Requires RAILWAY_ACCESS_TOKEN, RAILWAY_REFRESH_TOKEN, and RAILWAY_PROJECT_ID
+# Requires RAILWAY_TOKEN (project token from Railway → Settings → Tokens)
 # to be set in GitLab CI/CD variables.
-
-.railway-auth: &railway-auth
-  - npm install -g @railway/cli
-  - mkdir -p ~/.railway
-  - |
-    cat > ~/.railway/config.json <<EOF
-    {
-      "projects": {},
-      "user": {
-        "token": null,
-        "accessToken": "$RAILWAY_ACCESS_TOKEN",
-        "refreshToken": "$RAILWAY_REFRESH_TOKEN",
-        "tokenExpiresAt": 9999999999
-      },
-      "linkedFunctions": null
-    }
-    EOF
-  - railway whoami
 
 deploy-backend:
   stage: deploy
   image: node:20
   needs: [test-backend]
   script:
-    - *railway-auth
+    - npm install -g @railway/cli@4.44.0
     - railway up --service clockgame-backend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -77,7 +59,7 @@ deploy-frontend:
   image: node:20
   needs: [validate-frontend]
   script:
-    - *railway-auth
+    - npm install -g @railway/cli@4.44.0
     - railway up --service clockgame-frontend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
