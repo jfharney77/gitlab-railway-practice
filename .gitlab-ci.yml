@@ -4,7 +4,6 @@ stages:
   - deploy
 
 # ── Validate ──────────────────────────────────────────────────────────────────
-# Runs on every push / MR so issues are caught before merge.
 
 validate-frontend:
   stage: validate
@@ -27,7 +26,6 @@ validate-backend:
     - python -c "import main; print('Backend import OK')"
 
 # ── Test ───────────────────────────────────────────────────────────────────────
-# Runs after validate on every push. Catches logic bugs before deployment.
 
 test-backend:
   stage: test
@@ -40,17 +38,33 @@ test-backend:
     - python -m pytest tests/ -v
 
 # ── Deploy ─────────────────────────────────────────────────────────────────────
-# Runs only on the default branch after validation passes.
-# Requires RAILWAY_TOKEN (project token from Railway → Settings → Tokens)
-# to be set in GitLab CI/CD variables.
+# Requires RAILWAY_ACCESS_TOKEN and RAILWAY_REFRESH_TOKEN set in GitLab CI/CD
+# variables (from user.accessToken / user.refreshToken in ~/.railway/config.json).
+
+.railway-auth: &railway-auth
+  - npm install -g @railway/cli
+  - mkdir -p ~/.railway
+  - |
+    cat > ~/.railway/config.json <<EOF
+    {
+      "projects": {},
+      "user": {
+        "token": null,
+        "accessToken": "$RAILWAY_ACCESS_TOKEN",
+        "refreshToken": "$RAILWAY_REFRESH_TOKEN",
+        "tokenExpiresAt": 9999999999
+      },
+      "linkedFunctions": null
+    }
+    EOF
+  - railway whoami
 
 deploy-backend:
   stage: deploy
   image: node:20
   needs: [test-backend]
   script:
-    - npm install -g @railway/cli@4.0.0
-    - echo "Token set:${RAILWAY_TOKEN:+ yes (${#RAILWAY_TOKEN} chars)}"
+    - *railway-auth
     - railway up --service clockgame-backend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -60,7 +74,7 @@ deploy-frontend:
   image: node:20
   needs: [validate-frontend]
   script:
-    - npm install -g @railway/cli@4.0.0
+    - *railway-auth
     - railway up --service clockgame-frontend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
