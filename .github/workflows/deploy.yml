@@ -75,9 +75,19 @@ jobs:
       - run: mkdir -p ~/.railway
       - name: Write Railway config
         run: |
+          WORKDIR=$(pwd)
           cat > ~/.railway/config.json <<EOF
           {
-            "projects": {},
+            "projects": {
+              "$WORKDIR": {
+                "projectPath": "$WORKDIR",
+                "name": "clockgame",
+                "project": "b90fd958-c198-46fb-a71d-13b8b56c8bc0",
+                "environment": "6401324c-fad5-40f9-8457-b95c42be32de",
+                "environmentName": "production",
+                "service": null
+              }
+            },
             "user": {
               "token": null,
               "accessToken": "${{ secrets.RAILWAY_ACCESS_TOKEN }}",
@@ -103,9 +113,19 @@ jobs:
       - run: mkdir -p ~/.railway
       - name: Write Railway config
         run: |
+          WORKDIR=$(pwd)
           cat > ~/.railway/config.json <<EOF
           {
-            "projects": {},
+            "projects": {
+              "$WORKDIR": {
+                "projectPath": "$WORKDIR",
+                "name": "clockgame",
+                "project": "b90fd958-c198-46fb-a71d-13b8b56c8bc0",
+                "environment": "6401324c-fad5-40f9-8457-b95c42be32de",
+                "environmentName": "production",
+                "service": null
+              }
+            },
             "user": {
               "token": null,
               "accessToken": "${{ secrets.RAILWAY_ACCESS_TOKEN }}",
