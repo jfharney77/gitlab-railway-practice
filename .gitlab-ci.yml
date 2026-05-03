@@ -1,5 +1,6 @@
 stages:
   - validate
+  - test
   - deploy
 
 # ── Validate ──────────────────────────────────────────────────────────────────
@@ -24,6 +25,19 @@ validate-backend:
     - cd backend
     - pip install -r requirements.txt -q
     - python -c "import main; print('Backend import OK')"
+
+# ── Test ───────────────────────────────────────────────────────────────────────
+# Runs after validate on every push. Catches logic bugs before deployment.
+
+test-backend:
+  stage: test
+  image: python:3.12-slim
+  needs: [validate-backend]
+  script:
+    - cd backend
+    - pip install -r requirements.txt -q
+    - pip install -r requirements-test.txt -q
+    - python -m pytest tests/ -v
 
 # ── Deploy ─────────────────────────────────────────────────────────────────────
 # Runs only on the default branch after validation passes.
@@ -51,7 +65,7 @@ validate-backend:
 deploy-backend:
   stage: deploy
   image: node:20
-  needs: [validate-backend]
+  needs: [test-backend]
   script:
     - *railway-auth
     - railway up --service clockgame-backend --environment production
