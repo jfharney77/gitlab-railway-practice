@@ -49,7 +49,7 @@ deploy-backend:
   image: node:20
   needs: [test-backend]
   script:
-    - npm install -g @railway/cli@4.44.0
+    - npm install -g @railway/cli@3.23.0
     - echo "Token set:${RAILWAY_TOKEN:+ yes (${#RAILWAY_TOKEN} chars)}"
     - railway up --service clockgame-backend --environment production
   rules:
@@ -60,7 +60,7 @@ deploy-frontend:
   image: node:20
   needs: [validate-frontend]
   script:
-    - npm install -g @railway/cli@4.44.0
+    - npm install -g @railway/cli@3.23.0
     - railway up --service clockgame-frontend --environment production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
